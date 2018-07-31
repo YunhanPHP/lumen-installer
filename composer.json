@@ -1,0 +1,26 @@
+{
+  "name": "yunhanphp/lumen-installer",
+  "description": "Lumen application installer.",
+  "keywords": [
+    "laravel",
+    "lumen"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "RayGu",
+      "email": "raygu0101@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "YunhanPHP\\Lumen\\Installer\\Console\\": "src/"
+    }
+  },
+  "require": {
+    "laravel/lumen-installer": "^1.0"
+  },
+  "bin": [
+    "lumen-app"
+  ]
+}
