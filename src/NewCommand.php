@@ -43,13 +43,17 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
         $input->setArgument('name', $input->getArgument('name') . '/src');
         (new \Lumen\Installer\Console\NewCommand())->execute($input, $output);
 
+        $output->writeln('<info>Install app deps...</info>');
+
         // 执行项目框架所需
         $composer = $this->findComposer();
 
         $commands = [
             // 安装开发环境集成
-            $composer . ' config repositories.0 git https://github.com/YunhanPHP/lumen-require-dev.git',
-            $composer . ' require --dev yunhanphp/lumen-require-dev',
+            $composer . ' config repositories.lumen-app-installer git https://github.com/YunhanPHP/lumen-require-dev.git',
+            $composer . ' config repositories.lumen-dev-db-doc git https://github.com/YunhanTech/laravel-db-doc.git',
+            $composer . ' config repositories.lumen-dev-yaml-swagger git https://github.com/YunhanTech/swagger-lumen-yaml.git',
+            $composer . ' require --dev yunhanphp/lumen-require-dev ^1.0',
 
             // 复制 env 到本地
             $composer . ' run-script post-root-package-install'
