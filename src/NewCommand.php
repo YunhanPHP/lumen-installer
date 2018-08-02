@@ -22,8 +22,10 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
             throw new RuntimeException('The Zip PHP extension is not installed. Please install it and try again.');
         }
 
+        $projectName = $input->getArgument('name');
+
         $this->verifyApplicationDoesntExist(
-            $directory = getcwd() . '/' . $input->getArgument('name')
+            $directory = getcwd() . '/' . $projectName
         );
 
         $output->writeln('<info>Creating application...</info>');
@@ -39,24 +41,22 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
         @rename($extractDir . '/lumen-app-master', $directory);
         @rmdir($extractDir);
 
-        // 执行 lumen 安装
-        $input->setArgument('name', $input->getArgument('name') . '/src');
-        (new \Lumen\Installer\Console\NewCommand())->execute($input, $output);
-
-        $output->writeln('<info>Install app deps...</info>');
 
         // 执行项目框架所需
         $composer = $this->findComposer();
 
         $commands = [
+            // 安装 lumen，不用 lumen 安装方法是因为其中的下载包有时会无法下载
+            $composer . ' create-project laravel/lumen src --prefer-dist',
+
+            // 进入对应目录
+            'cd src',
+
             // 安装开发环境集成
             $composer . ' config repositories.lumen-app-installer git https://github.com/YunhanPHP/lumen-require-dev.git',
             $composer . ' config repositories.lumen-dev-db-doc git https://github.com/YunhanTech/laravel-db-doc.git',
             $composer . ' config repositories.lumen-dev-yaml-swagger git https://github.com/YunhanTech/swagger-lumen-yaml.git',
             $composer . ' require --dev yunhanphp/lumen-require-dev dev-master',
-
-            // 复制 env 到本地
-            $composer . ' run-script post-root-package-install'
         ];
 
         if ($input->getOption('no-ansi')) {
@@ -65,7 +65,7 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
             }, $commands);
         }
 
-        $process = new Process(implode(' && ', $commands), $directory . '/src', null, null, null);
+        $process = new Process(implode(' && ', $commands), $directory, null, null, null);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             $process->setTty(true);
