@@ -11,6 +11,16 @@ use Symfony\Component\Process\Process;
 class NewCommand extends \Lumen\Installer\Console\NewCommand
 {
     /**
+     * Configure the command options.
+     * @return void
+     */
+    protected function configure()
+    {
+        parent::configure();
+        $this->addOption('inner');
+    }
+
+    /**
      * Execute the command.
      * @param  InputInterface  $input
      * @param  OutputInterface $output
@@ -52,12 +62,43 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
             // 进入对应目录
             'cd src',
 
-            // 安装开发环境集成
+            // 移动文件
+            'php -r "@rename(\'' . $directory . '/tmp/.phan\', \'' . $directory . '/src/.phan\');"',
+            'php -r "@rmdir(\'' . $directory . '/tmp\');"',
+        ];
+
+        $isInner = $input->getOption('inner');
+
+        // 生产环境集成
+        if ($isInner) {
+            // 公司内部
+            $commands = array_merge($commands, [
+                $composer . ' config repositories.lumen-require git ssh://git@code.aliyun.com/jqb-php/lumen-require.git',
+                $composer . ' require yunhanphp/lumen-require dev-master',
+
+                // 覆盖bootstrap
+                'php -r "copy(\'' . __DIR__ . '/app/bootstrap/app.php\', \'' . $directory . '/src/bootstrap/app.php\');"'
+            ]);
+        } else {
+            $commands = array_merge($commands, [
+                $composer . ' require albertcht/lumen-helpers'
+            ]);
+        }
+
+        // 安装开发环境集成
+        $commands = array_merge($commands, [
             $composer . ' config repositories.lumen-app-installer git https://github.com/YunhanPHP/lumen-require-dev.git',
             $composer . ' config repositories.lumen-dev-db-doc git https://github.com/YunhanTech/laravel-db-doc.git',
             $composer . ' config repositories.lumen-dev-yaml-swagger git https://github.com/YunhanTech/swagger-lumen-yaml.git',
             $composer . ' require --dev yunhanphp/lumen-require-dev dev-master',
-        ];
+        ]);
+
+        if ($isInner) {
+            $commands = array_merge($commands, [
+                'php artisan ide-helper:generate',
+                'php artisan ide-helper:meta'
+            ]);
+        }
 
         if ($input->getOption('no-ansi')) {
             $commands = array_map(function ($value) {
