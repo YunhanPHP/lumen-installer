@@ -88,7 +88,7 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
         // 安装开发环境集成
         $commands = array_merge($commands, [
             $composer . ' config repositories.lumen-app-installer git https://github.com/YunhanPHP/lumen-require-dev.git',
-            $composer . ' config repositories.lumen-dev-db-doc git https://github.com/YunhanTech/laravel-db-doc.git',
+            $composer . ' config repositories.lumen-dev-db-doc git https://github.com/YunhanPHP/lumen-dev-db-doc.git',
             $composer . ' config repositories.lumen-dev-yaml-swagger git https://github.com/YunhanPHP/lumen-dev-yaml-swagger.git',
             $composer . ' require --dev yunhanphp/lumen-require-dev dev-master',
         ]);
