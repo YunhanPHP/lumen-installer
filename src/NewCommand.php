@@ -72,12 +72,17 @@ class NewCommand extends \Lumen\Installer\Console\NewCommand
         // 生产环境集成
         if ($isInner) {
             // 公司内部
+            $lumenRequireDir = $directory . '/src/vendor/yunhanphp/lumen-require';
             $commands = array_merge($commands, [
                 $composer . ' config repositories.lumen-require git ssh://git@code.aliyun.com/jqb-php/lumen-require.git',
                 $composer . ' require yunhanphp/lumen-require dev-master',
 
                 // 覆盖bootstrap
-                'php -r "copy(\'' . __DIR__ . '/app/bootstrap/app.php\', \'' . $directory . '/src/bootstrap/app.php\');"'
+                'php -r "copy(\'' . $lumenRequireDir . '/app/bootstrap/app.php\', \'' . $directory . '/src/bootstrap/app.php\');"',
+                'php -r "copy(\'' . $lumenRequireDir . '/app/env.example.php\', \'' . $directory . '/src/env.example.php\');"',
+                'php -r "copy(\'' . $directory . '/src/env.example.php\', \'' . $directory . '/src/env.php\');"',
+                'php -r "@unlink(\'' . $directory . '/src/.env\');"',
+                'php -r "@unlink(\'' . $directory . '/src/.env.example\');"',
             ]);
         } else {
             $commands = array_merge($commands, [
